@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 const userData = [
 	{ id: 1, name: "John Doe", email: "john@example.com", role: "Customer", status: "Active" },
@@ -13,6 +13,15 @@ const userData = [
 const UsersTable = () => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredUsers, setFilteredUsers] = useState(userData);
+	const [showForm, setShowForm] = useState(false);
+	const [formMode, setFormMode] = useState("create"); // "create" or "edit"
+	const [formValues, setFormValues] = useState({
+		id: null,
+		name: "",
+		email: "",
+		role: "",
+		status: ""
+	});
 
 	const handleSearch = (e) => {
 		const term = e.target.value.toLowerCase();
@@ -21,6 +30,63 @@ const UsersTable = () => {
 			(user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term)
 		);
 		setFilteredUsers(filtered);
+	};
+
+	const handleDelete = (id) => {
+		setFilteredUsers(filteredUsers.filter((user) => user.id !== id));
+	};
+
+	const handleEdit = (user) => {
+		setFormMode("edit");
+		setFormValues({
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			role: user.role,
+			status: user.status
+		});
+		setShowForm(true);
+	};
+
+	const handleFormSubmit = (e) => {
+		e.preventDefault();
+		
+		if (formMode === "edit") {
+			// Update existing user
+			const updatedUsers = filteredUsers.map((user) => 
+				user.id === formValues.id ? { ...formValues } : user
+			);
+			setFilteredUsers(updatedUsers);
+		} else {
+			// Create new user
+			// const newUser = {
+			// 	...formValues,
+			// 	id: Math.max(...filteredUsers.map(user => user.id)) + 1
+			// };
+			setFilteredUsers([...filteredUsers, newUser]);
+		}
+		
+		// Reset form and close it
+		handleFormClose();
+	};
+
+	const handleFormClose = () => {
+		setShowForm(false);
+		setFormValues({
+			id: null,
+			name: "",
+			email: "",
+			role: "",
+			status: ""
+		});
+	};
+
+	const handleInputChange = (e) => {
+		const { name, value } = e.target;
+		setFormValues({
+			...formValues,
+			[name]: value
+		});
 	};
 
 	return (
@@ -32,17 +98,132 @@ const UsersTable = () => {
 		>
 			<div className='flex justify-between items-center mb-6'>
 				<h2 className='text-xl font-semibold text-gray-100'>Users</h2>
-				<div className='relative'>
-					<input
-						type='text'
-						placeholder='Search users...'
-						className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-						value={searchTerm}
-						onChange={handleSearch}
-					/>
-					<Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
+				<div className='flex items-center space-x-4'>
+					<div className='relative'>
+						<input
+							type='text'
+							placeholder='Search users...'
+							className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+							value={searchTerm}
+							onChange={handleSearch}
+						/>
+						<Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
+					</div>
+					{/* <button 
+						onClick={() => {
+							setFormMode("create");
+							setShowForm(true);
+						}}
+						className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg'
+					>
+						Add User
+					</button> */}
 				</div>
 			</div>
+
+			{showForm && (
+				<motion.div 
+					className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+				>
+					<motion.div 
+						className='bg-gray-800 p-6 rounded-xl w-full max-w-md'
+						initial={{ scale: 0.9 }}
+						animate={{ scale: 1 }}
+					>
+						<div className='flex justify-between items-center mb-4'>
+							<h3 className='text-lg font-semibold text-white'>
+								{formMode === "edit" ? "Edit User" : "Add New User"}
+							</h3>
+							<button onClick={handleFormClose} className='text-gray-400 hover:text-white'>
+								<X size={20} />
+							</button>
+						</div>
+						
+						<form onSubmit={handleFormSubmit}>
+							<div className='mb-4'>
+								<label className='block text-gray-300 text-sm font-medium mb-2'>
+									Name
+								</label>
+								<input
+									type='text'
+									name='name'
+									value={formValues.name}
+									onChange={handleInputChange}
+									className='w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white'
+									required
+								/>
+							</div>
+							
+							<div className='mb-4'>
+								<label className='block text-gray-300 text-sm font-medium mb-2'>
+									Email
+								</label>
+								<input
+									type='email'
+									name='email'
+									value={formValues.email}
+									onChange={handleInputChange}
+									className='w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white'
+									required
+								/>
+							</div>
+							
+							<div className='mb-4'>
+								<label className='block text-gray-300 text-sm font-medium mb-2'>
+									Role
+								</label>
+								<select
+									name='role'
+									value={formValues.role}
+									onChange={handleInputChange}
+									className='w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white'
+									required
+								>
+									<option value="" disabled>Select role</option>
+									<option value="Customer">Customer</option>
+									<option value="Admin">Admin</option>
+									<option value="Moderator">Moderator</option>
+								</select>
+							</div>
+							
+							<div className='mb-6'>
+								<label className='block text-gray-300 text-sm font-medium mb-2'>
+									Status
+								</label>
+								<select
+									name='status'
+									value={formValues.status}
+									onChange={handleInputChange}
+									className='w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-white'
+									required
+								>
+									<option value="" disabled>Select status</option>
+									<option value="Active">Active</option>
+									<option value="Inactive">Inactive</option>
+								</select>
+							</div>
+							
+							<div className='flex justify-end space-x-3'>
+								<button
+									type='button'
+									onClick={handleFormClose}
+									className='px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700'
+								>
+									Cancel
+								</button>
+								<button
+									type='submit'
+									className='px-4 py-2 bg-blue-600 rounded-lg text-white hover:bg-blue-700'
+								>
+									{formMode === "edit" ? "Save Changes" : "Add User"}
+								</button>
+							</div>
+						</form>
+					</motion.div>
+				</motion.div>
+			)}
 
 			<div className='overflow-x-auto'>
 				<table className='min-w-full divide-y divide-gray-700'>
@@ -109,8 +290,18 @@ const UsersTable = () => {
 								</td>
 
 								<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-300'>
-									<button className='text-indigo-400 hover:text-indigo-300 mr-2'>Edit</button>
-									<button className='text-red-400 hover:text-red-300'>Delete</button>
+									<button 
+										onClick={() => handleEdit(user)} 
+										className='text-indigo-400 hover:text-indigo-300 mr-2'
+									>
+										Edit
+									</button>
+									<button 
+										onClick={() => handleDelete(user.id)} 
+										className='text-red-400 hover:text-red-300'
+									>
+										Delete
+									</button>
 								</td>
 							</motion.tr>
 						))}
