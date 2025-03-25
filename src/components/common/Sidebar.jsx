@@ -1,7 +1,7 @@
 import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SIDEBAR_ITEMS = [
 	{
@@ -19,13 +19,18 @@ const SIDEBAR_ITEMS = [
 ];
 
 const Sidebar = () => {
+	const navigate = useNavigate();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+	const handleLogout = () => {
+		localStorage.removeItem("token");
+		navigate("/login"); // Redirect to login page
+		window.location.reload(); // Refresh to update state
+	};
 	return (
 		<motion.div
-			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${
-				isSidebarOpen ? "w-64" : "w-20"
-			}`}
+			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen ? "w-64" : "w-20"
+				}`}
 			animate={{ width: isSidebarOpen ? 256 : 80 }}
 		>
 			<div className='h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700'>
@@ -60,6 +65,12 @@ const Sidebar = () => {
 						</Link>
 					))}
 				</nav>
+				<button
+					onClick={handleLogout}
+					className="mt-6 w-full py-2 bg-red-600 hover:bg-red-700 rounded"
+				>
+					Logout
+				</button>
 			</div>
 		</motion.div>
 	);
