@@ -1,111 +1,83 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
-const LoginForm = () => {
-  const [emailId, setEmailId] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../../utils/api';
 
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const navigate = useNavigate();
-  const autoRefresh = ()=>{
-    window.location.reload();
-  }
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setMessage("");
-
     try {
-      const response = await axios.post("https://709e-103-177-183-115.ngrok-free.app/login", {
-        emailId,
+      const response = await axios.post(`${BASE_URL}/auth/login`, {
+        email,
         password,
       });
 
-      setMessageType("success");
-      setMessage("Login successful!");
+      const { token, message } = response.data;
+      localStorage.setItem('token', token);
+      setSuccessMsg(message);
+      setError('');
 
-      // Store token
-      localStorage.setItem("token", response.data.token);
-
-      // Redirect to overview
-      navigate("/products");
-    } catch (error) {
-      setMessageType("error");
-      setMessage(
-        error.response?.data?.message || "Login failed! Please check your credentials."
-      );
-    } finally {
-      setIsLoading(false);
+      // Redirect to home after login
+      setTimeout(() => {
+        window.location.href = '/products';
+      }, 1000);// 1-second delay to show success message
+    } catch (err) {
+      setSuccessMsg('');
+      setError(err.response?.data?.message || 'Login failed');
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 to-purple-300">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-8 rounded-xl shadow-md w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-800">Login</h2>
 
-        {message && (
-          <div
-            className={`mb-4 p-3 rounded text-sm ${
-              messageType === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message}
-          </div>
-        )}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 border border-gray-300 rounded"
+          required
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={emailId}
-              onChange={(e) => setEmailId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="name@example.com"
-              required
-            />
-          </div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 mb-4 border border-gray-300 rounded"
+          required
+        />
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {successMsg && <p className="text-green-500 text-sm mb-4">{successMsg}</p>}
 
-          <button
-
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-              isLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >{autoRefresh}
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className="w-full relative top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded transition duration-200"
+        >
+          Login
+        </button>
+      </form>
     </div>
   );
 };
 
-export default LoginForm;
+export default Login;
+
+
+
 
 
 

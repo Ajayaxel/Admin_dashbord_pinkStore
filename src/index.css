@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 👇 Add this custom-scroll class */
+/* Horizontal scrollbar styles for the products table */
+.custom-scroll::-webkit-scrollbar {
+    height: 10px;
+  }
+  
+  .custom-scroll::-webkit-scrollbar-track {
+    background: #aa7fff;
+  }
+  
+  .custom-scroll::-webkit-scrollbar-thumb {
+    background-color: #6735cc;
+    border-radius: 10px;
+    border: 2px solid #ffffff;
+  }
+  
+  .custom-scroll::-webkit-scrollbar-thumb:hover {
+   
+    background-color: #340a69;
+  }
+  
