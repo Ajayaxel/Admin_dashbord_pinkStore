@@ -15,12 +15,15 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${BASE_URL}/auth/login`, {
+        email,
+        password,
+      },
+      {
         headers: {
           'Content-Type': 'application/json',
         },
-        email,
-        password,
-      });
+      }
+    );
 
       const { token, message } = response.data;
       localStorage.setItem('token', token);
