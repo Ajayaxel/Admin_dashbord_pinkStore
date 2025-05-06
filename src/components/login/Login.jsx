@@ -15,6 +15,9 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`${BASE_URL}/auth/login`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
         email,
         password,
       });

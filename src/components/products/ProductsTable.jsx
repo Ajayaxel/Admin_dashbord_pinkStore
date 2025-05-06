@@ -19,7 +19,12 @@ const ProductsTable = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/products`);
+      const res = await axios.get(`${BASE_URL}/products`, {
+        headers: {
+          "Content-Type": "application/json",
+          
+        },
+      });
       setProducts(res.data.data);
       setFilteredProducts(res.data.data);
     } catch (error) {
