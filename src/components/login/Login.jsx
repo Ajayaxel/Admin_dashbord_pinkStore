@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -13,38 +14,29 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        `${BASE_URL}/auth/login`,
-        {
-          email,
-          password,
+      const response = await axios.post(`${BASE_URL}/auth/login`, {
+        email,
+        password,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // Only needed if your backend uses cookies
-          // withCredentials: true,
-        }
-      );
+      }
+    );
 
       const { token, message } = response.data;
       localStorage.setItem('token', token);
       setSuccessMsg(message);
       setError('');
 
-      // Redirect to products page after 1 second
+      // Redirect to home after login
       setTimeout(() => {
         window.location.href = '/products';
-      }, 1000);
+      }, 1000);// 1-second delay to show success message
     } catch (err) {
-      console.error('Login Error:', err); // log full error
       setSuccessMsg('');
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        'Login failed. Please try again.'
-      );
+      setError(err.response?.data?.message || 'Login failed');
     }
   };
 
@@ -89,7 +81,6 @@ const Login = () => {
 };
 
 export default Login;
-
 
 
 
